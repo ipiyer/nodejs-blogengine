@@ -1,4 +1,4 @@
-var views = require('./views.js');
+var views = require('./login.js');
 
 module.exports = function(app){
     app.get(/\/admin\/login/, views.loginPage);

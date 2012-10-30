@@ -63,7 +63,7 @@ app.configure('production', function(){
 });
 
 
-var INSTALLED_APPS = ['./comments'];
+var INSTALLED_APPS = ['./comments', './auth'];
 
 
 // Import URL dispatcher
