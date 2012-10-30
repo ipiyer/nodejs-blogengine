@@ -1,15 +1,43 @@
 var express = require('express');
 var http = require('http');
 var path = require('path');
+var ConnectCouchDB = require('connect-couchdb')(express);
+
+var store = new ConnectCouchDB({
+  // Name of the database you would like to use for sessions.
+  name: 'sessions',
+
+  // Optional. How often expired sessions should be cleaned up.
+  // Defaults to 600000 (10 minutes).
+  reapInterval: 600000,
+
+  // Optional. How often to run DB compaction against the session
+  // database. Defaults to 300000 (5 minutes).
+  // To disable compaction, set compactInterval to -1
+  compactInterval: 300000,
+
+  // Optional. How many time between two identical session store
+  // Defaults to 60000 (1 minute)
+  setThrottle: 60000
+});
+
+
 
 PROJDIR = __dirname;
 
 var app = module.exports = express();
 
+
 app.configure(function(){
     app.set('port', process.env.PORT || 3000);
-    app.use(express.bodyParser());
+    app.use(express.cookieParser());
+    //app.use(express.cookieSession({store:store}));
+    app.use(express.session({ secret: 'keyboardcat',
+                              store: store,
+                              key: 'sid'}));
+
     app.use(express.methodOverride());
+    app.use(express.bodyParser());
     app.set('view engine', 'jade');
     app.set("views", path.join(PROJDIR, "templates"));
     app.use(express.favicon());
@@ -20,6 +48,7 @@ app.configure(function(){
     app.get(/\/css/, express.static(path.join(static,'css')));
     app.get(/\/images/, express.static(path.join(static,'images')));
 });
+
 
 app.configure('development', function(){
   app.use(express.errorHandler());
@@ -33,6 +62,7 @@ app.configure('production', function(){
     });
 });
 
+
 var INSTALLED_APPS = ['./comments'];
 
 
@@ -41,6 +71,8 @@ var INSTALLED_APPS = ['./comments'];
 INSTALLED_APPS.forEach(function(i){
     require(i + "/urls.js")(app);
 });
+
+
 
 // Import settings
 
